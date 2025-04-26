@@ -1,0 +1,30 @@
+﻿@model Employee
+
+<h2>Create Employee</h2>
+
+<form asp-action="Create" method="post">
+    <label>Name:</label>
+    <input asp-for="Name" /><br /><br />
+
+    <label>Gender:</label>
+    <input type="radio" asp-for="Gender" value="Male" /> Male
+    <input type="radio" asp-for="Gender" value="Female" /> Female
+    <br /><br />
+
+    <label>State:</label>
+    <select asp-for="State" asp-items="ViewBag.States"></select><br /><br />
+
+    <label>Address:</label>
+    <input asp-for="Address" /><br /><br />
+
+    <label>Phone:</label>
+    <input asp-for="Phone" /><br /><br />
+
+    <label>Salary:</label>
+    <input asp-for="Salary" /><br /><br />
+
+    <label>Email:</label>
+    <input asp-for="Email" /><br /><br />
+
+    <button type="submit">Save</button>
+</form>
