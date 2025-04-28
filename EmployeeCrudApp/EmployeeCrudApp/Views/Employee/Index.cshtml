@@ -1,38 +1,42 @@
 ﻿@model IEnumerable<Employee>
 
-<h2>Employee List</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-<a href="/Employee/Create">Add New Employee</a>
+<div class="container mt-4">
+    <h2 class="mb-4">Employee List</h2>
 
-<table border="1" cellpadding="5">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Gender</th>
-            <th>State</th>
-            <th>Address</th>
-            <th>Phone</th>
-            <th>Salary</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var emp in Model)
-        {
+    <a class="btn btn-primary mb-3" asp-action="Create">Add New Employee</a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
             <tr>
-                <td>@emp.Name</td>
-                <td>@emp.Gender</td>
-                <td>@emp.State</td>
-                <td>@emp.Address</td>
-                <td>@emp.Phone</td>
-                <td>@emp.Salary</td>
-                <td>@emp.Email</td>
-                <td>
-                    <a href="/Employee/Edit/@emp.Id">Edit</a> |
-                    <a href="/Employee/Delete/@emp.Id">Delete</a>
-                </td>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>State</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Salary</th>
+                <th>Email</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var emp in Model)
+            {
+                <tr>
+                    <td>@emp.Name</td>
+                    <td>@emp.Gender</td>
+                    <td>@emp.State</td>
+                    <td>@emp.Address</td>
+                    <td>@emp.Phone</td>
+                    <td>₹ @emp.Salary.ToString("N2")</td>
+                    <td>@emp.Email</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@emp.Id">Edit</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@emp.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
