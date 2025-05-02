@@ -1,13 +1,18 @@
 ﻿using EmployeeCrudApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-public class EmployeeController : Controller 
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+
+public class EmployeeController : Controller
 {
     private readonly AppDbContext _context;
-    public EmployeeController(AppDbContext context )
+
+    public EmployeeController(AppDbContext context)
     {
         _context = context;
     }
+
     private List<string> GetStates()
     {
         return new List<string> {
@@ -17,9 +22,9 @@ public class EmployeeController : Controller
         };
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var employees = _context.Employees.ToList();
+        var employees = await _context.Employees.ToListAsync();
         return View(employees);
     }
 
@@ -30,45 +35,74 @@ public class EmployeeController : Controller
     }
 
     [HttpPost]
-    public IActionResult Create(Employee employee)
+    public async Task<IActionResult> Create(Employee employee)
     {
+        employee.DateOfBirth = DateTime.SpecifyKind(employee.DateOfBirth, DateTimeKind.Utc);
+        employee.DateOfJoining = DateTime.SpecifyKind(employee.DateOfJoining, DateTimeKind.Utc);
         if (ModelState.IsValid)
         {
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                ModelState.AddModelError("", "Error saving the employee. Please try again.");
+            }
         }
         ViewBag.States = new SelectList(GetStates());
         return View(employee);
     }
 
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var employee = _context.Employees.Find(id);
+        
+        var employee = await _context.Employees.FindAsync(id);
         if (employee == null)
         {
             return NotFound();
         }
+        employee.DateOfBirth = DateTime.SpecifyKind(employee.DateOfBirth, DateTimeKind.Utc);
+        employee.DateOfJoining = DateTime.SpecifyKind(employee.DateOfJoining, DateTimeKind.Utc);
         ViewBag.States = new SelectList(GetStates());
         return View(employee);
     }
 
     [HttpPost]
-    public IActionResult Edit(Employee employee)
+    public async Task<IActionResult> Edit(int id, Employee employee)
     {
+        if (id != employee.Id)
+        {
+            return NotFound();
+        }
+
         if (ModelState.IsValid)
         {
-            _context.Employees.Update(employee);
-            _context.SaveChanges();
+            try
+            {
+                _context.Employees.Update(employee);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Employees.Any(e => e.Id == employee.Id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
             return RedirectToAction(nameof(Index));
         }
         ViewBag.States = new SelectList(GetStates());
         return View(employee);
     }
 
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var employee = _context.Employees.Find(id);
+        var employee = await _context.Employees.FindAsync(id);
         if (employee == null)
         {
             return NotFound();
@@ -77,16 +111,27 @@ public class EmployeeController : Controller
     }
 
     [HttpPost, ActionName("Delete")]
-    public IActionResult DeleteConfirmed(int id)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var employee = _context.Employees.Find(id);
+        var employee = await _context.Employees.FindAsync(id);
         if (employee == null)
         {
             return NotFound();
         }
-        _context.Employees.Remove(employee);
-        _context.SaveChanges();
+
+        try
+        {
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+           
+            ModelState.AddModelError("", "Error deleting the employee. Please try again.");
+            return View(employee);
+        }
+
         return RedirectToAction(nameof(Index));
     }
 }
-
